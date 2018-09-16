@@ -1,0 +1,30 @@
+{
+ "name": "@madelsberger/kihunter",
+ "version": "1.0.0",
+ "description": "twitch chat bot for the ALttP rando big key guessing game in Ganon's Tower",
+ "author": "Mark Adelsberger",
+ "license": "MIT",
+ "homepage": "https://github.com/madelsberger/kihunter#readme",
+ "bugs": "https://github.com/madelsberger/kihunter/issues",
+ "repository": "github:madelsberger/kihunter",
+ "keywords": [
+  "ALttP",
+  "ALttPR",
+  "twitch",
+  "twitch.tv",
+  "bigkey",
+  "bot",
+  "robot"
+ ],
+ "bin": {
+  "kihunter": "./kihunter.js"
+ },
+ "dependencies": {
+  "@madelsberger/pausebuffer": "^1.0.0",
+  "properties-reader": "0.0.16",
+  "tmi.js": "^1.2.1"
+ },
+ "devDependencies": {
+  "jasmine": "^3.2.0"
+ }
+}
