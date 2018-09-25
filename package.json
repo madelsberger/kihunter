@@ -1,6 +1,6 @@
 {
  "name": "@madelsberger/kihunter",
- "version": "1.0.1",
+ "version": "1.1.0",
  "description": "twitch chat bot for the ALttP rando big key guessing game in Ganon's Tower",
  "author": "Mark Adelsberger",
  "license": "MIT",

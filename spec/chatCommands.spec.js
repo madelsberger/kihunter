@@ -14,6 +14,7 @@ describe("chatCommands", function () {
       }
     , scoring : {
         multiguess : 'true'
+      , match: 'exact'
       , points : '7, 3, 1'
       }
     };
@@ -43,7 +44,11 @@ describe("chatCommands", function () {
     beforeEach(function () {
       this.huntStateMock['#link'] = {
         isOpen : true
-      , guesses : [['link'], undefined, ['ruto']]
+      , guesses : [
+          {offset: 0, by: ['link']}
+        , undefined
+        , {offset: 0, by: ['ruto']}
+        ]
       , guessers : {
           'link': 1
         , 'ruto': 3
@@ -52,7 +57,12 @@ describe("chatCommands", function () {
       };
       this.huntStateMock['#zelda'] = {
         isOpen : true
-      , guesses : [undefined, ['ganon'], undefined, ['impa']]
+      , guesses : [
+          undefined
+        , {offset: 0, by: ['ganon']}
+        , undefined
+        , {offset: 0, by: ['impa']}
+        ]
       , guessers : {
           'ganon': 2
         , 'impa': 4
@@ -80,8 +90,12 @@ describe("chatCommands", function () {
       expect(this.huntStateMock['#link'].guessers).toEqual({});
       expect(this.huntStateMock['#link'].remaining).toEqual(5);
 
-      expect(this.huntStateMock['#zelda'].guesses).toEqual(
-                                 [undefined, ['ganon'], undefined, ['impa']]);
+      expect(this.huntStateMock['#zelda'].guesses).toEqual([
+        undefined
+      , {offset: 0, by: ['ganon']}
+      , undefined
+      , {offset: 0, by: ['impa']}
+      ]);
       expect(this.huntStateMock['#zelda'].guessers).toEqual({
           'ganon': 2
         , 'impa': 4
@@ -107,8 +121,11 @@ describe("chatCommands", function () {
 
       expect(this.huntStateMock['#link'].isOpen).toBe(true);
       expect(this.clientMock.say).not.toHaveBeenCalled();
-      expect(this.huntStateMock['#link'].guesses).toEqual(
-                                 [['link'], undefined, ['ruto']]);
+      expect(this.huntStateMock['#link'].guesses).toEqual([
+        {offset: 0, by: ['link']}
+      , undefined
+      , {offset: 0, by: ['ruto']}
+      ]);
       expect(this.huntStateMock['#link'].guessers).toEqual({
           'link': 1
         , 'ruto': 3
@@ -135,13 +152,14 @@ describe("chatCommands", function () {
     });
 
     it("keeps any existing guesses", function () {
-      this.huntStateMock['#link'].guesses = [['ruto']];
+      this.huntStateMock['#link'].guesses = [{offset: 0, by: ['ruto']}];
       this.huntStateMock['#link'].guessers = {ruto : 1};
       this.huntStateMock['#link'].remaining = 4;
 
       this.getCommands().keyopen('#link', {mod: true});
 
-      expect(this.huntStateMock['#link'].guesses).toEqual([['ruto']]);
+      expect(this.huntStateMock['#link'].guesses)
+                                         .toEqual([{offset: 0, by: ['ruto']}]);
       expect(this.huntStateMock['#link'].guessers).toEqual({ruto: 1});
       expect(this.huntStateMock['#link'].remaining).toEqual(4);
     });
@@ -183,7 +201,7 @@ describe("chatCommands", function () {
     });
 
     it("indicates the ungessed ranges of guesses", function () {
-      this.huntStateMock['#link'].guesses[1] = ['talon'];
+      this.huntStateMock['#link'].guesses[1] = {offset: 0, by: ['talon']};
       this.huntStateMock['#link'].remaining = 4;
 
       this.getCommands().keylist('#link');
@@ -195,11 +213,11 @@ describe("chatCommands", function () {
     });
 
     it("indicates if all locations have at least one guess", function () {
-      this.huntStateMock['#link'].guesses[0] = ['malon'];
-      this.huntStateMock['#link'].guesses[1] = ['talon'];
-      this.huntStateMock['#link'].guesses[2] = ['ruto'];
-      this.huntStateMock['#link'].guesses[3] = ['saria'];
-      this.huntStateMock['#link'].guesses[4] = ['anju'];
+      this.huntStateMock['#link'].guesses[0] = {offset: 0, by: ['malon']};
+      this.huntStateMock['#link'].guesses[1] = {offset: 0, by: ['talon']};
+      this.huntStateMock['#link'].guesses[2] = {offset: 0, by: ['ruto']};
+      this.huntStateMock['#link'].guesses[3] = {offset: 0, by: ['saria']};
+      this.huntStateMock['#link'].guesses[4] = {offset: 0, by: ['anju']};
       this.huntStateMock['#link'].remaining = 0;
 
       this.getCommands().keylist('#link');
@@ -225,7 +243,7 @@ describe("chatCommands", function () {
         describe("only takes one guess per user", function () {
           beforeEach(function () {
             this.huntStateMock['#link'].guessers['impa'] = 1;
-            this.huntStateMock['#link'].guesses[0] = ['impa'];
+            this.huntStateMock['#link'].guesses[0] = {offset: 0, by: ['impa']};
             this.huntStateMock['#link'].remaining = 4;
           });
 
@@ -252,7 +270,7 @@ describe("chatCommands", function () {
         describe("that has been guessed before", function () {
           beforeEach(function () {
             this.huntStateMock['#link'].guessers['bagu'] = 1;
-            this.huntStateMock['#link'].guesses[0] = ['bagu'];
+            this.huntStateMock['#link'].guesses[0] = {offset: 0, by: ['bagu']};
             this.huntStateMock['#link'].remaining = 4;
           });
 
@@ -264,7 +282,8 @@ describe("chatCommands", function () {
             it("and, by default, notifies chat", function () {
               this.getCommands().keyguess('#link', {username: 'error'}, [1]);
 
-              expect(this.huntStateMock['#link'].guesses[0]).toEqual(['bagu']);
+              expect(this.huntStateMock['#link'].guesses[0])
+                                           .toEqual({offset: 0, by: ['bagu']});
               expect(this.huntStateMock['#link']
                                               .guessers.error).toBe(undefined);
               expect(this.huntStateMock['#link'].remaining).toEqual(4);
@@ -275,7 +294,8 @@ describe("chatCommands", function () {
               this.propertiesMock.chat.feedback.mode.failure = 0;
               this.getCommands().keyguess('#link', {username: 'error'}, [1]);
 
-              expect(this.huntStateMock['#link'].guesses[0]).toEqual(['bagu']);
+              expect(this.huntStateMock['#link'].guesses[0])
+                                           .toEqual({offset: 0, by: ['bagu']});
               expect(this.huntStateMock['#link']
                                               .guessers.error).toBe(undefined);
               expect(this.huntStateMock['#link'].remaining).toEqual(4);
@@ -288,7 +308,7 @@ describe("chatCommands", function () {
               this.getCommands().keyguess('#link', {username: 'error'}, [1]);
 
               expect(this.huntStateMock['#link'].guesses[0])
-                                                  .toEqual(['bagu', 'error']);
+                                  .toEqual({offset: 0, by: ['bagu', 'error']});
               expect(this.huntStateMock['#link'].guessers.error).toEqual(1);
               expect(this.huntStateMock['#link'].remaining).toEqual(4);
               expect(this.clientMock.action).not.toHaveBeenCalled();
@@ -300,7 +320,7 @@ describe("chatCommands", function () {
               this.getCommands().keyguess('#link', {username: 'error'}, [1]);
 
               expect(this.huntStateMock['#link'].guesses[0])
-                                                  .toEqual(['bagu', 'error']);
+                                  .toEqual({offset: 0, by: ['bagu', 'error']});
               expect(this.huntStateMock['#link'].guessers.error).toEqual(1);
               expect(this.huntStateMock['#link'].remaining).toEqual(4);
               expect(this.clientMock.action).not.toHaveBeenCalled();
@@ -313,7 +333,7 @@ describe("chatCommands", function () {
               this.getCommands().keyguess('#link', {username: 'error'}, [1]);
 
               expect(this.huntStateMock['#link'].guesses[0])
-                                                  .toEqual(['bagu', 'error']);
+                                 .toEqual({offset: 0, by: ['bagu', 'error']});
               expect(this.huntStateMock['#link'].guessers.error).toEqual(1);
               expect(this.huntStateMock['#link'].remaining).toEqual(4);
               expect(this.clientMock.action).toHaveBeenCalled();
@@ -331,7 +351,8 @@ describe("chatCommands", function () {
           it("and, by default, batches a notification", function () {
             this.getCommands().keyguess('#link', {username: 'error'}, [1]);
 
-            expect(this.huntStateMock['#link'].guesses[0]).toEqual(['error']);
+            expect(this.huntStateMock['#link'].guesses[0])
+                                         .toEqual({offset: 0, by: ['error']});
             expect(this.huntStateMock['#link'].guessers.error).toEqual(1);
             expect(this.huntStateMock['#link'].remaining).toEqual(4);
             expect(this.clientMock.action).not.toHaveBeenCalled();
@@ -342,7 +363,8 @@ describe("chatCommands", function () {
             this.propertiesMock.chat.feedback.mode.success = 0;
             this.getCommands().keyguess('#link', {username: 'error'}, [1]);
 
-            expect(this.huntStateMock['#link'].guesses[0]).toEqual(['error']);
+            expect(this.huntStateMock['#link'].guesses[0])
+                                          .toEqual({offset: 0, by: ['error']});
             expect(this.huntStateMock['#link'].guessers.error).toEqual(1);
             expect(this.huntStateMock['#link'].remaining).toEqual(4);
             expect(this.clientMock.action).not.toHaveBeenCalled();
@@ -354,7 +376,8 @@ describe("chatCommands", function () {
             this.propertiesMock.chat.feedback.mode.success = 2;
             this.getCommands().keyguess('#link', {username: 'error'}, [1]);
 
-            expect(this.huntStateMock['#link'].guesses[0]).toEqual(['error']);
+            expect(this.huntStateMock['#link'].guesses[0])
+                                         .toEqual({offset: 0, by: ['error']});
             expect(this.huntStateMock['#link'].guessers.error).toEqual(1);
             expect(this.huntStateMock['#link'].remaining).toEqual(4);
             expect(this.clientMock.action).toHaveBeenCalled();
@@ -390,7 +413,11 @@ describe("chatCommands", function () {
     beforeEach(function () {
       this.huntStateMock['#link'] = {
         isOpen : true
-      , guesses : [['link'], undefined, ['ruto']]
+      , guesses : [
+          {offset: 0, by: ['link']}
+        , undefined
+        , {offset: 0, by: ['ruto']}
+      ]
       , guessers : {
           'link': 1
         , 'ruto': 3
@@ -399,7 +426,12 @@ describe("chatCommands", function () {
       };
       this.huntStateMock['#zelda'] = {
         isOpen : true
-      , guesses : [undefined, ['ganon'], undefined, ['impa']]
+      , guesses : [
+          undefined
+        , {offset: 0, by: ['ganon']}
+        , undefined
+        , {offset: 0, by: ['impa']}
+      ]
       , guessers : {
           'ganon': 2
         , 'impa': 4
@@ -416,7 +448,7 @@ describe("chatCommands", function () {
     it("preserves guess state", function () {
       this.getCommands().keyclose('#link', {username: 'zelda', mod: true});
       expect(this.huntStateMock['#link'].guesses).toEqual(
-                                              [['link'], undefined, ['ruto']]);
+            [{offset: 0, by: ['link']}, undefined, {offset: 0, by: ['ruto']}]);
       expect(this.huntStateMock['#link'].guessers).toEqual(
                                                        {'link': 1, 'ruto': 3});
       expect(this.huntStateMock['#link'].remaining).toEqual(3);
@@ -457,8 +489,10 @@ describe("chatCommands", function () {
     });
 
     it("reports points if multiguess is on", function () {
-      this.huntStateMock['#link'].guesses[2] =
-                     ['arghus', 'kholdstare', 'armos', 'moldorm', 'mothula'];
+      this.huntStateMock['#link'].guesses[2] = {
+        offset: 0
+      , by: ['arghus', 'kholdstare', 'armos', 'moldorm', 'mothula']
+      };
       this.getCommands().keyfound(
                        '#link', {username: 'zelda', mod: true}, [3]);
       expect(this.clientMock.say).toHaveBeenCalledWith(
@@ -473,8 +507,10 @@ describe("chatCommands", function () {
 
     it("has configurable point values ", function () {
       this.propertiesMock.scoring.points = '4,3,2,1';
-      this.huntStateMock['#link'].guesses[2] =
-                     ['arghus', 'kholdstare', 'armos', 'moldorm', 'mothula'];
+      this.huntStateMock['#link'].guesses[2] = {
+        offset: 0
+      , by: ['arghus', 'kholdstare', 'armos', 'moldorm', 'mothula']
+      };
       this.getCommands().keyfound(
                        '#link', {username: 'zelda', mod: true}, [3]);
       expect(this.clientMock.say).toHaveBeenCalledWith(
@@ -490,12 +526,59 @@ describe("chatCommands", function () {
     });
 
     it("reports a winer if multiguess is off", function () {
-      this.propertiesMock.scoring.multiguess = false;
-      this.huntStateMock['#link'].guesses[2] = ['tetra'];
+      this.propertiesMock.scoring.multiguess = 'false';
+      this.huntStateMock['#link'].guesses[2] = {offset: 0, by: ['tetra']};
       this.getCommands().keyfound(
                        '#link', {username: 'zelda', mod: true}, [3]);
       expect(this.clientMock.say).toHaveBeenCalledWith(
                        '#link', jasmine.stringMatching(/winner is tetra/), 2);
+    });
+
+    it("can be configuerd to take the closest guess as the sole winner",
+        function () {
+      this.propertiesMock.scoring.match = 'closest';
+      this.propertiesMock.scoring.multiguess = 'false';
+      this.huntStateMock['#link'].isOpen = true;
+
+      // because this depends on non-obvious state updates when guesses are
+      // recorded, we'll do our setup by actual keyguess calls
+      const commands = this.getCommands();
+      commands.keyguess('#link', {username: 'fred'}, [0]);
+      commands.keyguess('#link', {username: 'koume'}, [3]);
+      commands.keyguess('#link', {username: 'kotake'}, [1]);
+      commands.keyguess('#link', {username: 'bob'}, [3]);
+      this.clientMock.say.calls.reset();
+
+      commands.keyfound('#link', {username: 'zelda', mod: true}, [2]);
+
+      expect(this.clientMock.say).toHaveBeenCalledWith(
+                       '#link', jasmine.stringMatching(/winner is koume/), 2);
+    });
+
+    it("can be configured to award points to the closest guess(es)",
+        function () {
+      this.propertiesMock.scoring.match = 'closest';
+      this.huntStateMock['#link'].isOpen = true;
+      
+      // because this depends on non-obvious state updates when guesses are
+      // recorded, we'll do our setup by actual keyguess calls
+      const commands = this.getCommands();
+      commands.keyguess('#link', {username: 'fred'}, [0]);
+      commands.keyguess('#link', {username: 'koume'}, [3]);
+      commands.keyguess('#link', {username: 'kotake'}, [1]);
+      commands.keyguess('#link', {username: 'bob'}, [3]);
+      this.clientMock.say.calls.reset();
+
+      commands.keyfound('#link', {username: 'zelda', mod: true}, [2]);
+
+      expect(this.clientMock.say).toHaveBeenCalledWith(
+                '#link', jasmine.stringMatching(/7 points for koume/), 2);
+      expect(this.clientMock.say).toHaveBeenCalledWith(
+                '#link', jasmine.stringMatching(/3 points for kotake/), 2);
+      expect(this.clientMock.say).toHaveBeenCalledWith(
+                '#link', jasmine.stringMatching(/1 points for bob/), 2);
+      expect(this.clientMock.say).not.toHaveBeenCalledWith(
+                '#link', jasmine.stringMatching(/fred/), 2);
     });
 
     it("only works for mods", function () {

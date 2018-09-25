@@ -74,6 +74,15 @@ You can adjust how the game is scored.
   (assuming anyone guesses correctly); but once all locations are claimed,
   guessing is automatically closed. 
 
+* **match** (default 'exact') : By default, only players who guess the exact
+  location can win.  If you set *match* to `closest`, then the closest
+  guess(es) win instead.  e.g. if the key is found at 3, but nobody guessed 3,
+  then 2 and 4 are considered as winning guesses; and if nobody guessed 2, 3,
+  or 4, then 1 and 5 are considered; then 6; then 7; etc.
+  When *multiguess* is true, points are still awarded in order of guess - so
+  if 2 and 4 were guessed, whichever was guessed first gets 1st-place points,
+  etc.  When *multiguess* is false, the first "equally correct" guess wins.
+
 * **points** (default `7, 3, 1`) : In *multiguess* mode, this determines the
   points awarded for each correct guess.  The first correct guess is awarded
   points equal to the first value, and so on.  If there are more correct
