@@ -6,7 +6,7 @@ describe("batcher", function () {
     jasmine.clock().install();
 
     this.propertiesMock = {
-      tmijs : { channels : 'channel1, channel2' }
+      tmijs : { channels : 'channel1,channel2' }
     , chat : {
         commandprefix : '!'
       , feedback : {batch :{
